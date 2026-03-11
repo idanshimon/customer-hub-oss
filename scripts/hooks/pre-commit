@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Pre-commit hook: auto-optimize staged PNG files with pngquant
+# Install: cp scripts/hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+# Or: cd .git/hooks && ln -sf ../../scripts/hooks/pre-commit pre-commit
+
+if ! command -v pngquant &>/dev/null; then
+  exit 0  # silently skip if pngquant not installed
+fi
+
+staged_pngs=$(git diff --cached --name-only --diff-filter=ACM | grep -i '\.png$' || true)
+
+if [ -z "$staged_pngs" ]; then
+  exit 0
+fi
+
+echo "🖼️  Optimizing staged PNGs..."
+for f in $staged_pngs; do
+  [ -f "$f" ] || continue
+  before=$(stat -f%z "$f" 2>/dev/null || stat -c%s "$f" 2>/dev/null)
+  pngquant --quality=85-100 --speed 1 --force --output "${f}.opt" "$f" 2>/dev/null || continue
+  after=$(stat -f%z "${f}.opt" 2>/dev/null || stat -c%s "${f}.opt" 2>/dev/null)
+  if [ "$after" -lt "$before" ]; then
+    mv "${f}.opt" "$f"
+    git add "$f"
+    pct=$(( (before - after) * 100 / before ))
+    echo "  ✓ $(basename "$f"): $((before/1024))KB → $((after/1024))KB (-${pct}%)"
+  else
+    rm -f "${f}.opt"
+  fi
+done

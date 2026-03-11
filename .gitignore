@@ -1,0 +1,8 @@
+.venv/
+.DS_Store
+*.pyc
+__pycache__/
+data/source/*.xlsx
+data/exports/*.csv
+data/outputs/
+~$*
