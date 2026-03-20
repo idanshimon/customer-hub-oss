@@ -44,6 +44,7 @@ cd customer-hub
 ├── strategy/                  # Internal programs & initiatives
 ├── community/                 # Professional communities & peer groups
 ├── network/                   # Partner & vendor relationships
+├── profile/                   # Personal dashboards & goals
 ├── wiki/                      # Static reference material
 ├── data/                      # Workspace-level datasets & reports
 ├── docs/                      # Context Anchors (methodology & rules)

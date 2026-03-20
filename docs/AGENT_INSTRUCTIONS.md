@@ -75,6 +75,8 @@ Chat thread files follow the same general structure as meeting notes but with th
 - **Participants:** Active contributors (not attendees)
 - Content is **distilled** — extract decisions, action items, strategic signals, key quotes. Not raw paste.
 - Reference images inline: `![description](../images/YYYY-MM-DD/filename.png)`
+- Mark image references for files not saved to disk: `[📷 IMAGE REF: description — shared by X on DATE]`
+- Use `[📷 IMAGE NEEDED: ...]` only when the file is actively needed (critical diagrams, etc.)
 
 ### Processing Protocol
 When processing a raw chat export:
@@ -88,11 +90,18 @@ When processing a raw chat export:
 Every date folder containing images MUST have an `images.json` manifest.
 
 ### Location
+Images are stored per-customer with date subfolders. The manifest lives alongside the images:
+```
+cust/<customer>/context/images/
+└── YYYY-MM-DD/
+    ├── images.json        ← manifest
+    ├── screenshot-1.png
+    └── diagram-2.png
+```
+
+For meeting-specific images, they may also live under:
 ```
 cust/<customer>/context/meeting-notes/images/YYYY-MM-DD/
-├── images.json        ← manifest
-├── screenshot-1.png
-└── diagram-2.png
 ```
 
 ### Schema
@@ -103,12 +112,15 @@ cust/<customer>/context/meeting-notes/images/YYYY-MM-DD/
     "source": "screenshot | shared_in_chat | shared_in_meeting | exported | generated",
     "captured_by": "Person Name",
     "captured_at": "ISO 8601 timestamp",
-    "type": "screenshot | architecture_diagram | workflow_diagram | slide | reference_doc | ui_screenshot",
+    "type": "screenshot | architecture_diagram | workflow_diagram | slide | reference_doc | ui_screenshot | gif | photo",
     "associations": {
       "customers": ["customer-slug"],
       "meetings": ["YYYY-MM-DD_meeting-name.md"],
+      "threads": ["YYYY-MM-DD_thread-name.md"],
       "topics": ["topic1", "topic2"]
     },
+    "thread_context": "One-liner: what was being discussed when this was shared",
+    "entities": ["Person", "Product", "Technology"],
     "caption": "Human-readable description of what the image shows",
     "vision_analyzed": false
   }
@@ -117,6 +129,17 @@ cust/<customer>/context/meeting-notes/images/YYYY-MM-DD/
 
 ### Required Fields
 - `file`, `source`, `type`, `caption`
+
+### Optional Fields
+- All others. Populate what you know; leave out what you don't.
+
+### Rules
+- When processing a meeting transcript or chat thread that references images, always create/update `images.json`
+- Set `vision_analyzed: false` until an agent has run vision analysis on the image
+- After vision analysis, update `caption` with richer description and set `vision_analyzed: true`
+- Images shared in chat but not yet saved to disk should be noted in the distilled thread markdown as `[📷 IMAGE REF: description — shared by X on DATE]`
+- `IMAGE REF` = context captured, file not expected. If someone later saves the file, update the manifest.
+- `IMAGE NEEDED` = file is actively needed (e.g., critical diagram). Use sparingly.
 
 ## Planning Protocol
 - **Folder:** All feature and workflow plans live under `plans/`.

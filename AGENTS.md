@@ -29,7 +29,7 @@ Before helping with any task in this repository:
 - **Don't Mix Customers:** Never blend data between customer folders
 - **Python Scripts:** Always activate `.venv` before running Python scripts
 - **Updates:** After making changes, update the customer's `CHANGELOG.md`
-- **Screenshots:** Save meeting screenshots to `meeting-notes/images/YYYY-MM-DD/` with descriptive filenames. Screenshots are first-class meeting artifacts — capture screenshares, architecture diagrams, whiteboard sessions, and any visual context shared during calls.
+- **Screenshots:** Save meeting screenshots to `meeting-notes/images/YYYY-MM-DD/` with descriptive filenames. Screenshots are first-class meeting artifacts — capture screenshares, architecture diagrams, whiteboard sessions, and any visual context shared during calls. Always note the capture/save date and source (e.g., "Source: Team meeting, Captured: March 5, 2026") so future sessions know how current the image is.
 
 ## Repository Purpose
 
