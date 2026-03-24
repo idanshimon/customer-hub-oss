@@ -39,6 +39,7 @@ cd customer-hub
 │           ├── personas.md    # Key stakeholders
 │           ├── architecture.md # Technical environment
 │           ├── opp-history.md # Opportunities & history
+│           ├── competitors.md # Competitive landscape
 │           ├── CHANGELOG.md   # Status & change tracking
 │           └── meeting-notes/ # Chronological meeting notes
 ├── strategy/                  # Internal programs & initiatives
@@ -53,11 +54,23 @@ cd customer-hub
 │   ├── add_strategy.sh
 │   ├── add_community.sh
 │   ├── new_meeting.sh
+│   ├── generate_report.py     # Territory & customer reports (HTML)
 │   ├── optimize-images.sh     # PNG optimization (pngquant)
 │   └── hooks/
 │       └── pre-commit         # Auto-optimize images on commit
 └── plans/                     # Feature & workflow plans
 ```
+
+## Skills
+
+Built-in AI assistant skills in `skills/`:
+
+| Skill | Description |
+|:---|:---|
+| **customer-hub** | Core CRM workflows — load customers, process transcripts, meeting prep, email drafting |
+| **customer-hub-merge** | Extract customer data from ChatGPT/Teams Copilot conversations and merge into context files |
+| **livemeeting** | Real-time meeting assistant — paste transcript chunks and get live summaries + action items |
+| **reporting** | Generate HTML territory dashboards, customer deep-dives, and weekly activity reports |
 
 ## For AI Assistants
 
@@ -120,6 +133,27 @@ This is a template. Make it yours:
 3. **Customize `docs/BUSINESS_RULES.md`** with your industry/role-specific rules
 4. **Add wiki content** for your organization's reference material
 5. **Set up the pre-commit hook** for image optimization
+6. **Set up upstream** for future updates: `git remote add upstream https://github.com/idanshimon/customer-hub-oss.git`
+
+## Reports
+
+Generate self-contained HTML reports from your customer data:
+
+```bash
+# Territory dashboard — all customers at a glance
+python scripts/generate_report.py
+
+# Single customer deep-dive
+python scripts/generate_report.py --customer acme-corp
+
+# Weekly activity summary
+python scripts/generate_report.py --weekly
+
+# Open in browser automatically
+python scripts/generate_report.py --open
+```
+
+Reports are saved to `data/outputs/` as standalone HTML files — no dependencies, works offline, share with your manager.
 
 ## License
 

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customer Deep Dive — Design Reference</title>
+<style>
+/* ═══ RESET & BASE ═══ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #e6edf3; font-size: 14px; line-height: 1.5; }
+
+/* ═══ HEADER ═══ */
+header { background: linear-gradient(135deg, #161b22 0%, #1c2128 100%); border-bottom: 1px solid #30363d; padding: 32px 48px; }
+.health-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.health-dot.active { background: #3fb950; }
+.health-dot.urgent { background: #f85149; }
+.health-dot.watch { background: #d29922; }
+.health-dot.cold { background: #484f58; }
+header h1 { font-size: 28px; font-weight: 700; color: #f0f6fc; display: inline; }
+header .tpid { font-size: 12px; color: #484f58; margin-top: 4px; }
+header .overview { font-size: 14px; color: #8b949e; margin-top: 12px; max-width: 900px; line-height: 1.6; }
+.badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 20px; letter-spacing: 0.3px; margin-left: 12px; vertical-align: middle; }
+.badge-green { background: rgba(63,185,80,0.15); color: #3fb950; }
+.badge-red { background: rgba(248,81,73,0.15); color: #f85149; }
+.badge-yellow { background: rgba(210,153,34,0.15); color: #d29922; }
+.badge-blue { background: rgba(88,166,255,0.15); color: #58a6ff; }
+.badge-grey { background: rgba(72,79,88,0.2); color: #8b949e; }
+
+/* ═══ STATS ROW ═══ */
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; padding: 24px 48px; max-width: 1400px; margin: 0 auto; }
+.stat-card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 20px; text-align: center; }
+.stat-card .big { font-size: 32px; font-weight: 700; }
+.stat-card .sub { font-size: 12px; color: #8b949e; margin-top: 4px; }
+
+/* ═══ TAB BAR ═══ */
+.tab-bar { background: #161b22; border-bottom: 2px solid #30363d; padding: 0 48px; display: flex; gap: 4px; position: sticky; top: 0; z-index: 100; }
+.tab-btn { padding: 14px 24px; font-size: 14px; font-weight: 600; color: #8b949e; background: none; border: none; border-bottom: 3px solid transparent; cursor: pointer; transition: all 0.15s; margin-bottom: -2px; }
+.tab-btn:hover { color: #f0f6fc; }
+.tab-btn.active { color: #58a6ff; border-bottom-color: #58a6ff; }
+
+/* ═══ MAIN ═══ */
+main { padding: 32px 48px; max-width: 1400px; margin: 0 auto; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ═══ SECTION HEADER ═══ */
+.section-header { font-size: 20px; font-weight: 700; color: #f0f6fc; margin: 32px 0 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+.section-header:first-child { margin-top: 0; }
+
+/* ═══ STAKEHOLDERS ═══ */
+.stakeholder-group { margin-bottom: 24px; }
+.stakeholder-group h3 { font-size: 14px; font-weight: 600; color: #58a6ff; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid #21262d; }
+.stakeholder { display: grid; grid-template-columns: 200px 1fr 280px; gap: 16px; padding: 10px 12px; border-bottom: 1px solid #21262d; align-items: start; }
+.stakeholder:nth-child(even) { background: rgba(13,17,23,0.5); }
+.stakeholder .s-name { font-weight: 600; color: #f0f6fc; font-size: 13px; }
+.stakeholder .s-title { color: #8b949e; font-size: 11px; margin-top: 1px; }
+.stakeholder .s-role { color: #e6edf3; font-size: 12px; }
+.stakeholder .s-note { color: #484f58; font-size: 11px; }
+.star { color: #d29922; }
+
+/* ═══ ENGAGEMENT TRACKS ═══ */
+.track-card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+.track-card.hot { border-left: 3px solid #58a6ff; }
+.track-card h3 { font-size: 15px; font-weight: 700; color: #f0f6fc; margin-bottom: 8px; }
+.track-card .track-status { font-size: 13px; color: #8b949e; margin-bottom: 12px; line-height: 1.5; }
+.track-card .track-actions { }
+.track-card .track-actions .action-item { display: flex; gap: 8px; padding: 4px 0; font-size: 12px; color: #cdd9e5; }
+.track-card .track-actions .action-item::before { content: "□"; color: #58a6ff; flex-shrink: 0; }
+.track-card .track-actions .action-item.urgent::before { content: "🔴"; }
+.owner { color: #58a6ff; font-weight: 600; }
+
+/* ═══ TIMELINE ═══ */
+.timeline { position: relative; padding-left: 24px; }
+.timeline::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: #21262d; }
+.timeline-item { position: relative; padding: 12px 0 12px 20px; border-bottom: 1px solid #21262d; }
+.timeline-item::before { content: ''; position: absolute; left: -20px; top: 18px; width: 10px; height: 10px; border-radius: 50%; background: #30363d; border: 2px solid #58a6ff; }
+.timeline-item.recent::before { background: #58a6ff; }
+.timeline-date { font-size: 12px; font-weight: 600; color: #58a6ff; }
+.timeline-title { font-size: 14px; font-weight: 600; color: #f0f6fc; margin-top: 2px; }
+.timeline-summary { font-size: 12px; color: #8b949e; margin-top: 4px; line-height: 1.5; }
+.timeline-topics { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.topic-tag { background: rgba(88,166,255,0.1); border: 1px solid rgba(88,166,255,0.2); color: #58a6ff; font-size: 10px; padding: 1px 6px; border-radius: 3px; }
+
+/* ═══ ACTION ITEMS ═══ */
+.action-group { margin-bottom: 20px; }
+.action-group h3 { font-size: 13px; font-weight: 600; color: #e6edf3; margin-bottom: 8px; }
+.action-item { display: flex; gap: 8px; padding: 6px 0; border-bottom: 1px solid #21262d; font-size: 12px; color: #cdd9e5; align-items: flex-start; }
+.action-item:last-child { border-bottom: none; }
+.action-item::before { content: "□"; color: #58a6ff; flex-shrink: 0; margin-top: 1px; }
+.action-item.urgent::before { content: "🔴"; }
+.action-item.done { text-decoration: line-through; color: #484f58; }
+.action-item.done::before { content: "✓"; color: #3fb950; }
+
+/* ═══ COMPETITORS ═══ */
+.competitor-card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+.competitor-card h3 { font-size: 15px; font-weight: 700; color: #f85149; margin-bottom: 4px; }
+.competitor-card .comp-status { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-bottom: 8px; }
+.comp-embedded { background: rgba(248,81,73,0.15); color: #f85149; }
+.comp-evaluating { background: rgba(210,153,34,0.15); color: #d29922; }
+.comp-piloting { background: rgba(88,166,255,0.15); color: #58a6ff; }
+.competitor-card .comp-detail { font-size: 12px; color: #8b949e; line-height: 1.5; }
+.competitor-card .comp-strategy { margin-top: 8px; padding-top: 8px; border-top: 1px solid #21262d; }
+.competitor-card .comp-strategy strong { color: #e6edf3; font-size: 12px; }
+
+/* ═══ ARCHITECTURE ═══ */
+.arch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.arch-block { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; }
+.arch-block h4 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #58a6ff; margin-bottom: 8px; }
+.arch-block ul { list-style: none; }
+.arch-block li { font-size: 12px; color: #e6edf3; padding: 3px 0; }
+.arch-block li::before { content: "›"; color: #58a6ff; margin-right: 6px; }
+
+/* ═══ FOOTER ═══ */
+footer { padding: 24px 48px; border-top: 1px solid #30363d; display: flex; justify-content: space-between; font-size: 11px; color: #484f58; }
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width: 768px) {
+  header, main, footer { padding-left: 16px; padding-right: 16px; }
+  .stats-row { grid-template-columns: 1fr 1fr; padding-left: 16px; padding-right: 16px; }
+  .tab-bar { padding: 0 12px; overflow-x: auto; }
+  .stakeholder { grid-template-columns: 1fr; gap: 4px; }
+  .arch-grid { grid-template-columns: 1fr; }
+}
+
+/* ═══ PRINT ═══ */
+@media print {
+  body { background: #fff; color: #1a1a1a; }
+  .tab-bar { display: none; }
+  .tab-panel { display: block !important; }
+  .card, .track-card, .competitor-card, .stat-card, .arch-block { background: #fff; border-color: #ddd; }
+  header { background: #f5f5f5; }
+  .section-header { color: #1a1a1a; border-color: #ddd; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     CUSTOMER DEEP DIVE — Reference Layout
+     ═══════════════════════════════════════════════ -->
+
+<header>
+  <div>
+    <span class="health-dot active"></span>
+    <h1>Acme Healthcare</h1>
+    <span class="badge badge-green">🟢 Active</span>
+  </div>
+  <div class="tpid">TPID 999999</div>
+  <p class="overview">
+    Major integrated healthcare delivery system serving 2.8M patients across 12 hospitals. Comprehensive digital transformation in flight — cloud migration, AI/ML platform evaluation, and developer productivity enhancement. Microsoft emerging as strategic partner alongside existing AWS infrastructure.
+  </p>
+</header>
+
+<div class="stats-row">
+  <div class="stat-card"><div class="big" style="color:#58a6ff">23</div><div class="sub">Meetings</div></div>
+  <div class="stat-card"><div class="big" style="color:#3fb950">30</div><div class="sub">Stakeholders</div></div>
+  <div class="stat-card"><div class="big" style="color:#d29922">16</div><div class="sub">Open Actions</div></div>
+  <div class="stat-card"><div class="big" style="color:#f85149">2</div><div class="sub">Competitors</div></div>
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" data-tab="tracks">Engagement Tracks</button>
+  <button class="tab-btn" data-tab="stakeholders">Stakeholders</button>
+  <button class="tab-btn" data-tab="timeline">Meeting Timeline</button>
+  <button class="tab-btn" data-tab="actions">Action Items</button>
+  <button class="tab-btn" data-tab="compete">Competitive</button>
+  <button class="tab-btn" data-tab="arch">Architecture</button>
+</div>
+
+<main>
+
+<!-- ═══ ENGAGEMENT TRACKS ═══ -->
+<div class="tab-panel active" id="panel-tracks">
+  <div class="section-header">Engagement Tracks</div>
+
+  <div class="track-card hot">
+    <h3>Track 1: Platform Modernization — Sarah Chen (VP Engineering)</h3>
+    <div class="track-status">AWS→Azure migration Phase 2. Architecture review complete, POC provisioned. Key blocker: Terraform state migration. Target: production workloads by Q3.</div>
+    <div class="track-actions">
+      <div class="action-item urgent"><span class="owner">[Idan]</span> Architecture blueprint finalization — Copilot Studio vs Foundry vs Fabric decision</div>
+      <div class="action-item"><span class="owner">[SE]</span> Provision sandbox + GitHub environment setup</div>
+    </div>
+  </div>
+
+  <div class="track-card">
+    <h3>Track 2: AI/ML Platform — David Okafor (Chief AI Officer)</h3>
+    <div class="track-status">Evaluating Azure AI vs AWS Bedrock for clinical decision support. HIPAA compliance and model hosting governance are key differentiators. Customer leaning Azure.</div>
+    <div class="track-actions">
+      <div class="action-item"><span class="owner">[All]</span> Solution design workshop — map full MSFT stack to customer vision</div>
+    </div>
+  </div>
+
+  <div class="track-card">
+    <h3>Track 3: Developer Productivity — Marcus Rivera (Dev Lead)</h3>
+    <div class="track-status">Copilot pilot: 78% adoption in 50-seat group. Board approved expansion to 500 seats. Cursor was evaluated but Copilot won on governance integration.</div>
+  </div>
+</div>
+
+<!-- ═══ STAKEHOLDERS ═══ -->
+<div class="tab-panel" id="panel-stakeholders">
+  <div class="section-header">Stakeholders</div>
+
+  <div class="stakeholder-group">
+    <h3>👤 Customer Team (6)</h3>
+    <div class="stakeholder">
+      <div><div class="s-name"><span class="star">⭐⭐</span> Sarah Chen</div><div class="s-title">VP Engineering</div></div>
+      <div class="s-role">Executive sponsor. Drives cloud migration and platform decisions. Reports to CTO.</div>
+      <div class="s-note">Prefers async communication. Technical background — speaks architecturally.</div>
+    </div>
+    <div class="stakeholder">
+      <div><div class="s-name"><span class="star">⭐</span> David Okafor</div><div class="s-title">Chief AI Officer</div></div>
+      <div class="s-role">AI/ML platform decisions. Evaluating Azure AI vs Bedrock. Key TDM for AI workloads.</div>
+      <div class="s-note">Academic background (former ML researcher). Data-driven, wants benchmarks.</div>
+    </div>
+    <div class="stakeholder">
+      <div><div class="s-name">Marcus Rivera</div><div class="s-title">Sr. Developer Lead</div></div>
+      <div class="s-role">Day-to-day technical counterpart. Runs the Copilot pilot program.</div>
+      <div class="s-note">Hands-on coder. Responds quickly on Teams.</div>
+    </div>
+  </div>
+
+  <div class="stakeholder-group">
+    <h3>🏢 Your Org Team (3)</h3>
+    <div class="stakeholder">
+      <div><div class="s-name">James Mitchell</div><div class="s-title">Account Executive</div></div>
+      <div class="s-role">Account lead. Coordinates exec-level relationships and commercial terms.</div>
+      <div class="s-note">Based in Nashville. Strong exec relationships at customer.</div>
+    </div>
+    <div class="stakeholder">
+      <div><div class="s-name">You (SE)</div><div class="s-title">Solution Engineer</div></div>
+      <div class="s-role">Technical lead across all tracks. Architecture, POC execution, demos.</div>
+      <div class="s-note"></div>
+    </div>
+  </div>
+
+  <div class="stakeholder-group">
+    <h3>🤝 Partners (1)</h3>
+    <div class="stakeholder">
+      <div><div class="s-name">Priya Kapoor</div><div class="s-title">Sr. Consultant, TechBridge (SI)</div></div>
+      <div class="s-role">Implementation partner. Leading migration workstream execution.</div>
+      <div class="s-note">Strong Azure infra skills. Works on-site 3 days/week.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MEETING TIMELINE ═══ -->
+<div class="tab-panel" id="panel-timeline">
+  <div class="section-header">Meeting Timeline</div>
+  <div class="timeline">
+    <div class="timeline-item recent">
+      <div class="timeline-date">Mar 21, 2026</div>
+      <div class="timeline-title">AI Platform Architecture Review</div>
+      <div class="timeline-summary">Deep dive on Azure AI vs AWS Bedrock. Customer leaning toward Azure for HIPAA compliance. Discussed model hosting, RAG patterns, data governance. 5 attendees.</div>
+      <div class="timeline-topics">
+        <span class="topic-tag">Azure AI</span>
+        <span class="topic-tag">Architecture</span>
+        <span class="topic-tag">HIPAA</span>
+      </div>
+    </div>
+    <div class="timeline-item recent">
+      <div class="timeline-date">Mar 17, 2026</div>
+      <div class="timeline-title">Copilot Expansion Review</div>
+      <div class="timeline-summary">Reviewed pilot metrics: 78% adoption, 23% productivity improvement reported. Board approved 500-seat expansion. Cursor evaluated but Copilot won on governance.</div>
+      <div class="timeline-topics">
+        <span class="topic-tag">Copilot</span>
+        <span class="topic-tag">Metrics</span>
+        <span class="topic-tag">Expansion</span>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-date">Mar 10, 2026</div>
+      <div class="timeline-title">Platform Modernization Kickoff</div>
+      <div class="timeline-summary">Discovery meeting. 6 attendees. Agreed on phased approach — Azure as secondary cloud initially, growing to co-primary. Terraform state migration identified as key challenge.</div>
+      <div class="timeline-topics">
+        <span class="topic-tag">Migration</span>
+        <span class="topic-tag">Discovery</span>
+        <span class="topic-tag">Azure</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ACTION ITEMS ═══ -->
+<div class="tab-panel" id="panel-actions">
+  <div class="section-header">Action Items</div>
+
+  <div class="action-group">
+    <h3>Platform Modernization</h3>
+    <div class="action-item urgent"><span class="owner">[Idan]</span> Finalize architecture blueprint — Copilot Studio vs Foundry vs Fabric decision</div>
+    <div class="action-item"><span class="owner">[Idan]</span> Provision sandbox + GitHub environment setup</div>
+    <div class="action-item"><span class="owner">[Partner]</span> Terraform state migration plan — due next Friday</div>
+  </div>
+
+  <div class="action-group">
+    <h3>AI/ML Platform</h3>
+    <div class="action-item"><span class="owner">[All]</span> Solution design workshop — map full MSFT stack to customer vision</div>
+    <div class="action-item"><span class="owner">[Idan]</span> Prepare RAG pattern comparison document</div>
+  </div>
+
+  <div class="action-group">
+    <h3>General</h3>
+    <div class="action-item"><span class="owner">[AE]</span> Schedule combined exec sync — targeting end of month</div>
+    <div class="action-item done"><span class="owner">[Idan]</span> Send architecture review notes to team — ✓ Completed Mar 22</div>
+  </div>
+</div>
+
+<!-- ═══ COMPETITIVE ═══ -->
+<div class="tab-panel" id="panel-compete">
+  <div class="section-header">Competitive Landscape</div>
+
+  <div class="competitor-card">
+    <h3>Amazon Web Services (AWS)</h3>
+    <span class="comp-status comp-embedded">EMBEDDED — Primary Cloud</span>
+    <div class="comp-detail">
+      AWS is the incumbent cloud provider. ~80% of production workloads run on AWS (EC2, S3, RDS, Lambda). 5-year EDP agreement, ~$12M/yr spend. Strong relationships with DevOps team.
+    </div>
+    <div class="comp-strategy">
+      <strong>Strategy: Coexistence</strong> — Position Azure as complementary for AI/ML workloads and Microsoft ecosystem integration (M365, Entra ID, Copilot). Don't try to displace AWS — expand Azure's footprint via new workloads.
+    </div>
+  </div>
+
+  <div class="competitor-card">
+    <h3>Google Cloud</h3>
+    <span class="comp-status comp-evaluating">EVALUATING — AI/ML</span>
+    <div class="comp-detail">
+      Customer evaluating Vertex AI for ML model training and serving. No current production usage. 2 data scientists attended Google Cloud Next.
+    </div>
+    <div class="comp-strategy">
+      <strong>Strategy: Displacement</strong> — Lead with Azure AI's HIPAA compliance story and unified identity (Entra ID). Vertex AI lacks BAA coverage for several services. Emphasize single-vendor governance.
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ARCHITECTURE ═══ -->
+<div class="tab-panel" id="panel-arch">
+  <div class="section-header">Architecture Overview</div>
+
+  <div class="arch-grid">
+    <div class="arch-block">
+      <h4>Cloud & Infrastructure</h4>
+      <ul>
+        <li>AWS primary (EC2, S3, RDS, Lambda)</li>
+        <li>Azure growing (M365 E5, some Azure AD)</li>
+        <li>On-prem VMware (legacy clinical systems)</li>
+        <li>Terraform for IaC</li>
+      </ul>
+    </div>
+    <div class="arch-block">
+      <h4>Development</h4>
+      <ul>
+        <li>Java/Spring Boot (backend services)</li>
+        <li>React (patient portal, internal tools)</li>
+        <li>Python (ML/data science)</li>
+        <li>Jenkins CI/CD (migrating to GitHub Actions)</li>
+      </ul>
+    </div>
+    <div class="arch-block">
+      <h4>Data Platform</h4>
+      <ul>
+        <li>Oracle (legacy EHR database)</li>
+        <li>Snowflake (analytics warehouse)</li>
+        <li>Kafka (event streaming)</li>
+        <li>Epic FHIR APIs (clinical data)</li>
+      </ul>
+    </div>
+    <div class="arch-block">
+      <h4>Security & Compliance</h4>
+      <ul>
+        <li>HIPAA (all patient data systems)</li>
+        <li>SOC 2 Type II (infrastructure)</li>
+        <li>CrowdStrike (endpoint)</li>
+        <li>Okta (identity — evaluating Entra ID)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<footer>
+  <span>Generated by customer-hub reporting skill</span>
+  <span>March 24, 2026</span>
+</footer>
+
+<!-- ═══ TAB SWITCHING JS ═══ -->
+<script>
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+  });
+});
+</script>
+
+</body>
+</html>

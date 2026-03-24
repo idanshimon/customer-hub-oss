@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Territory Dashboard — Design Reference</title>
+<style>
+/* ═══ RESET & BASE ═══ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #e6edf3; font-size: 14px; line-height: 1.5; }
+
+/* ═══ HEADER ═══ */
+header { background: linear-gradient(135deg, #161b22 0%, #1c2128 100%); border-bottom: 1px solid #30363d; padding: 32px 48px; }
+header .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: #58a6ff; margin-bottom: 8px; }
+header h1 { font-size: 28px; font-weight: 700; color: #f0f6fc; margin-bottom: 4px; }
+header .subtitle { font-size: 14px; color: #8b949e; }
+header .meta { margin-top: 16px; display: flex; gap: 32px; flex-wrap: wrap; }
+header .stat { text-align: center; }
+header .stat .val { font-size: 24px; font-weight: 700; color: #f0f6fc; }
+header .stat .lbl { font-size: 11px; color: #8b949e; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+/* ═══ FILTER BAR ═══ */
+.filter-bar { background: #161b22; border-bottom: 2px solid #30363d; padding: 0 48px; display: flex; align-items: center; gap: 4px; position: sticky; top: 0; z-index: 100; }
+.filter-btn { padding: 14px 20px; font-size: 13px; font-weight: 600; color: #8b949e; background: none; border: none; border-bottom: 3px solid transparent; cursor: pointer; transition: all 0.15s; white-space: nowrap; margin-bottom: -2px; }
+.filter-btn:hover { color: #f0f6fc; }
+.filter-btn.active { color: #58a6ff; border-bottom-color: #58a6ff; }
+.search-box { margin-left: auto; padding: 6px 12px; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #e6edf3; font-size: 13px; outline: none; width: 200px; }
+.search-box:focus { border-color: #58a6ff; }
+.search-box::placeholder { color: #484f58; }
+
+/* ═══ MAIN ═══ */
+main { padding: 32px 48px; max-width: 1400px; margin: 0 auto; }
+
+/* ═══ CARD GRID ═══ */
+.accounts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 20px; }
+
+/* ═══ CARD ═══ */
+.card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; overflow: hidden; transition: border-color 0.15s; }
+.card:hover { border-color: #58a6ff; }
+.card.urgent { border-color: #f85149; }
+.card.active { border-color: #3fb950; }
+.card.watch { border-color: #d29922; }
+.card.cold { border-color: #30363d; }
+
+/* Card Header */
+.card-header { padding: 16px 20px; border-bottom: 1px solid #21262d; display: flex; justify-content: space-between; align-items: flex-start; }
+.card-header .name { font-size: 16px; font-weight: 700; color: #f0f6fc; }
+.card-header .tpid { font-size: 11px; color: #484f58; margin-top: 2px; }
+
+/* Badges */
+.badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 20px; letter-spacing: 0.3px; flex-shrink: 0; }
+.badge-red { background: rgba(248,81,73,0.15); color: #f85149; }
+.badge-yellow { background: rgba(210,153,34,0.15); color: #d29922; }
+.badge-green { background: rgba(63,185,80,0.15); color: #3fb950; }
+.badge-blue { background: rgba(88,166,255,0.15); color: #58a6ff; }
+.badge-grey { background: rgba(72,79,88,0.2); color: #8b949e; }
+
+/* Card Metrics Bar */
+.card-metrics { padding: 12px 20px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; background: #0d1117; border-bottom: 1px solid #21262d; }
+.metric .val { font-size: 15px; font-weight: 700; color: #f0f6fc; }
+.metric .lbl { font-size: 10px; color: #8b949e; text-transform: uppercase; letter-spacing: 0.3px; }
+.metric .val.green { color: #3fb950; }
+.metric .val.yellow { color: #d29922; }
+.metric .val.red { color: #f85149; }
+.metric .val.blue { color: #58a6ff; }
+
+/* Card Body */
+.card-body { padding: 14px 20px; }
+
+/* Section Labels */
+.section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #8b949e; margin-bottom: 8px; margin-top: 12px; }
+.section-label:first-child { margin-top: 0; }
+
+/* Engagement Tracks */
+.engagement { background: #1c2128; border-radius: 6px; padding: 10px 12px; margin-bottom: 6px; }
+.engagement .eng-title { font-size: 13px; font-weight: 600; color: #f0f6fc; margin-bottom: 3px; }
+.engagement .eng-status { font-size: 12px; color: #8b949e; }
+.engagement.hot .eng-title { color: #58a6ff; }
+
+/* Action Items */
+.action-item { display: flex; gap: 8px; padding: 5px 0; border-bottom: 1px solid #21262d; font-size: 12px; color: #cdd9e5; align-items: flex-start; }
+.action-item:last-child { border-bottom: none; }
+.action-item::before { content: "□"; color: #58a6ff; flex-shrink: 0; margin-top: 1px; }
+.action-item.urgent::before { content: "🔴"; }
+.action-item .owner { color: #58a6ff; font-weight: 600; }
+.more-items { font-size: 11px; color: #484f58; padding-top: 4px; }
+
+/* Compete Tags */
+.compete { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.compete-tag { background: rgba(248,81,73,0.1); border: 1px solid rgba(248,81,73,0.2); color: #f85149; font-size: 11px; padding: 2px 6px; border-radius: 4px; }
+
+/* Next Action */
+.next-action { font-size: 12px; color: #8b949e; margin-top: 8px; padding-top: 8px; border-top: 1px solid #21262d; }
+
+/* No data */
+.no-data { color: #484f58; font-size: 13px; font-style: italic; padding: 8px 0; }
+
+/* ═══ DEEP DIVE SPECIFIC ═══ */
+
+/* Stat cards row (deep dive header) */
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+.stat-card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 20px; text-align: center; }
+.stat-card .big { font-size: 32px; font-weight: 700; }
+.stat-card .sub { font-size: 12px; color: #8b949e; margin-top: 4px; }
+
+/* Section headers (deep dive) */
+.section-header { font-size: 20px; font-weight: 700; color: #f0f6fc; margin: 32px 0 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+
+/* Stakeholder table */
+.stakeholder-group { margin-bottom: 24px; }
+.stakeholder-group h3 { font-size: 14px; font-weight: 600; color: #58a6ff; margin-bottom: 8px; }
+.stakeholder { display: flex; justify-content: space-between; padding: 8px 12px; border-bottom: 1px solid #21262d; align-items: center; }
+.stakeholder:nth-child(even) { background: rgba(22,27,34,0.5); }
+.stakeholder .s-name { font-weight: 600; color: #f0f6fc; font-size: 13px; }
+.stakeholder .s-role { color: #8b949e; font-size: 12px; }
+.stakeholder .s-note { color: #484f58; font-size: 11px; max-width: 300px; }
+
+/* Timeline */
+.timeline-item { display: flex; gap: 16px; padding: 12px 0; border-bottom: 1px solid #21262d; }
+.timeline-date { font-size: 12px; font-weight: 600; color: #58a6ff; white-space: nowrap; min-width: 90px; }
+.timeline-title { font-size: 13px; font-weight: 600; color: #f0f6fc; }
+.timeline-summary { font-size: 12px; color: #8b949e; margin-top: 2px; }
+
+/* ═══ FOOTER ═══ */
+footer { padding: 24px 48px; border-top: 1px solid #30363d; display: flex; justify-content: space-between; font-size: 11px; color: #484f58; }
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width: 768px) {
+  header, main, footer { padding-left: 16px; padding-right: 16px; }
+  header h1 { font-size: 22px; }
+  .meta { flex-wrap: wrap; gap: 12px; }
+  .filter-bar { padding: 0 12px; overflow-x: auto; }
+  .accounts-grid { grid-template-columns: 1fr; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
+}
+
+/* ═══ PRINT ═══ */
+@media print {
+  body { background: #fff; color: #1a1a1a; }
+  .filter-bar, .search-box { display: none; }
+  .card { break-inside: avoid; border-color: #ddd; background: #fff; }
+  .card-metrics { background: #f5f5f5; }
+  .engagement { background: #f0f0f0; }
+  header { background: #f5f5f5; }
+  .section-label { color: #666; }
+  .metric .val, .card-header .name, .stat-card .big { color: #1a1a1a; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     TERRITORY DASHBOARD — Reference Layout
+     ═══════════════════════════════════════════════ -->
+
+<header>
+  <div class="eyebrow">Territory Dashboard</div>
+  <h1>Customer Portfolio</h1>
+  <div class="subtitle">Auto-generated from customer-hub data · March 24, 2026</div>
+  <div class="meta">
+    <div class="stat"><div class="val">17</div><div class="lbl">Customers</div></div>
+    <div class="stat"><div class="val" style="color:#3fb950">6</div><div class="lbl">Active</div></div>
+    <div class="stat"><div class="val" style="color:#d29922">3</div><div class="lbl">Watch</div></div>
+    <div class="stat"><div class="val" style="color:#f85149">3</div><div class="lbl">Urgent</div></div>
+    <div class="stat"><div class="val" style="color:#8b949e">5</div><div class="lbl">Cold</div></div>
+    <div class="stat"><div class="val" style="color:#58a6ff">28</div><div class="lbl">Meetings This Month</div></div>
+  </div>
+</header>
+
+<div class="filter-bar">
+  <button class="filter-btn active" data-filter="all">All</button>
+  <button class="filter-btn" data-filter="active">🟢 Active</button>
+  <button class="filter-btn" data-filter="watch">🟡 Watch</button>
+  <button class="filter-btn" data-filter="urgent">🔴 Urgent</button>
+  <button class="filter-btn" data-filter="cold">⚪ Cold</button>
+  <input class="search-box" type="text" placeholder="Search customers...">
+</div>
+
+<main>
+<div class="accounts-grid">
+
+  <!-- ═══ URGENT CARD ═══ -->
+  <div class="card urgent" data-health="urgent">
+    <div class="card-header">
+      <div>
+        <div class="name">Acme Healthcare</div>
+        <div class="tpid">TPID 999999</div>
+      </div>
+      <span class="badge badge-red">🔴 Renewal Mar 30</span>
+    </div>
+    <div class="card-metrics">
+      <div class="metric"><div class="val">23</div><div class="lbl">Meetings</div></div>
+      <div class="metric"><div class="val green">30</div><div class="lbl">Stakeholders</div></div>
+      <div class="metric"><div class="val green">3 days</div><div class="lbl">Last Touch</div></div>
+    </div>
+    <div class="card-body">
+      <div class="section-label">Active Tracks</div>
+      <div class="engagement hot">
+        <div class="eng-title">Platform Modernization — Sarah Chen (VP Eng)</div>
+        <div class="eng-status">AWS→Azure migration Phase 2. Architecture review complete, POC in flight.</div>
+      </div>
+      <div class="engagement">
+        <div class="eng-title">AI/ML Platform — David Okafor (Chief AI Officer)</div>
+        <div class="eng-status">Evaluating Azure AI vs Bedrock for clinical decision support. HIPAA compliance key differentiator.</div>
+      </div>
+      <div class="engagement">
+        <div class="eng-title">Developer Productivity — Marcus Rivera (Dev Lead)</div>
+        <div class="eng-status">Copilot pilot: 78% adoption in 50-seat group. Expanding to 500.</div>
+      </div>
+
+      <div class="section-label">Action Items</div>
+      <div class="actions">
+        <div class="action-item urgent"><span class="owner">[James]</span> Schedule PG leader call — decision timeline: weeks</div>
+        <div class="action-item"><span class="owner">[Idan]</span> Copilot CLI deep-dive workshop with engineering team</div>
+        <div class="action-item"><span class="owner">[Idan]</span> Prepare bake-off comparison materials</div>
+        <div class="action-item"><span class="owner">[All]</span> Solution design workshop — map full stack to customer vision</div>
+      </div>
+      <div class="more-items">+12 more items</div>
+
+      <div class="section-label">Compete</div>
+      <div class="compete">
+        <span class="compete-tag">AWS (embedded)</span>
+        <span class="compete-tag">Google Cloud (evaluating)</span>
+      </div>
+
+      <div class="next-action">Next: Schedule combined PG call for Agent 365 — targeting next week</div>
+    </div>
+  </div>
+
+  <!-- ═══ ACTIVE CARD ═══ -->
+  <div class="card active" data-health="active">
+    <div class="card-header">
+      <div>
+        <div class="name">Summit Health Partners</div>
+        <div class="tpid">TPID 123456</div>
+      </div>
+      <span class="badge badge-green">Active</span>
+    </div>
+    <div class="card-metrics">
+      <div class="metric"><div class="val">5</div><div class="lbl">Meetings</div></div>
+      <div class="metric"><div class="val green">12</div><div class="lbl">Stakeholders</div></div>
+      <div class="metric"><div class="val green">8 days</div><div class="lbl">Last Touch</div></div>
+    </div>
+    <div class="card-body">
+      <div class="section-label">Active Tracks</div>
+      <div class="engagement">
+        <div class="eng-title">Copilot Centralized Enablement</div>
+        <div class="eng-status">3,000 seats. Admin controls + RBAC rollout. Governance framework approved.</div>
+      </div>
+
+      <div class="section-label">Action Items</div>
+      <div class="actions">
+        <div class="action-item"><span class="owner">[SE]</span> Schedule GHAS deep-dive demo for AppSec team</div>
+        <div class="action-item"><span class="owner">[AE]</span> Align internal teams on migration sequencing</div>
+      </div>
+
+      <div class="section-label">Compete</div>
+      <div class="compete">
+        <span class="compete-tag">GitLab (incumbent)</span>
+      </div>
+
+      <div class="next-action">Next: Schedule GHAS demo + internal alignment meeting</div>
+    </div>
+  </div>
+
+  <!-- ═══ WATCH CARD ═══ -->
+  <div class="card watch" data-health="watch">
+    <div class="card-header">
+      <div>
+        <div class="name">Meridian Care Network</div>
+        <div class="tpid">TPID 789012</div>
+      </div>
+      <span class="badge badge-yellow">⚠️ Renewal May 30</span>
+    </div>
+    <div class="card-metrics">
+      <div class="metric"><div class="val">2</div><div class="lbl">Meetings</div></div>
+      <div class="metric"><div class="val yellow">4</div><div class="lbl">Stakeholders</div></div>
+      <div class="metric"><div class="val yellow">28 days</div><div class="lbl">Last Touch</div></div>
+    </div>
+    <div class="card-body">
+      <div class="section-label">Active Tracks</div>
+      <div class="no-data">No active engagement tracks documented</div>
+
+      <div class="section-label">Action Items</div>
+      <div class="actions">
+        <div class="action-item urgent"><span class="owner">[AE]</span> Re-engage customer — AE departed, no handoff</div>
+      </div>
+
+      <div class="next-action">Next: Validate renewal timeline and identify new champion</div>
+    </div>
+  </div>
+
+  <!-- ═══ COLD CARD ═══ -->
+  <div class="card cold" data-health="cold">
+    <div class="card-header">
+      <div>
+        <div class="name">Pacific Medical Group</div>
+        <div class="tpid">TPID 345678</div>
+      </div>
+      <span class="badge badge-grey">Not Started</span>
+    </div>
+    <div class="card-metrics">
+      <div class="metric"><div class="val red">0</div><div class="lbl">Meetings</div></div>
+      <div class="metric"><div class="val red">0</div><div class="lbl">Stakeholders</div></div>
+      <div class="metric"><div class="val red">Never</div><div class="lbl">Last Touch</div></div>
+    </div>
+    <div class="card-body">
+      <div class="section-label">Active Tracks</div>
+      <div class="no-data">No engagement — populate ACR details & stakeholders</div>
+
+      <div class="next-action">Next: Populate ACR details & stakeholders</div>
+    </div>
+  </div>
+
+</div><!-- .accounts-grid -->
+</main>
+
+<footer>
+  <span>Generated by customer-hub reporting skill</span>
+  <span>March 24, 2026</span>
+</footer>
+
+<!-- ═══ INTERACTIVE JS ═══ -->
+<script>
+// Filter buttons
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const filter = btn.dataset.filter;
+    document.querySelectorAll('.card').forEach(card => {
+      if (filter === 'all' || card.dataset.health === filter) {
+        card.style.display = '';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  });
+});
+
+// Search
+document.querySelector('.search-box').addEventListener('input', e => {
+  const q = e.target.value.toLowerCase();
+  document.querySelectorAll('.card').forEach(card => {
+    const name = card.querySelector('.name').textContent.toLowerCase();
+    card.style.display = name.includes(q) ? '' : 'none';
+  });
+});
+</script>
+
+</body>
+</html>

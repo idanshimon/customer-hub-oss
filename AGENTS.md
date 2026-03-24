@@ -21,10 +21,51 @@ Before helping with any task in this repository:
      2. `personas.md` - Key stakeholders
      3. `architecture.md` - Technical environment
      4. `opp-history.md` - Sales opportunities and history
-     5. Recent files in `meeting-notes/` folder
+     5. `competitors.md` - Competitive landscape at this account
+     6. Recent files in `meeting-notes/` folder
+
+## Protected Paths (DO NOT MODIFY)
+
+The following paths are maintained by the upstream template and updated via `git merge upstream/main`.
+Do **NOT** create, edit, or delete files in these directories:
+
+- `docs/` — Methodology and business rules
+- `scripts/` — Scaffolding and automation
+- `skills/` — Agent skills (updated via upstream)
+- `.github/` — Copilot instructions
+- `AGENTS.md` — This file
+
+**You MAY freely create and edit:**
+
+- `cust/` — All customer data (your source of truth)
+- `strategy/` — Your strategic notes and initiatives
+- `community/` — Your professional communities
+- `network/` — Your partner and vendor relationships
+- `wiki/` — Shared knowledge (additions welcome)
+- `profile/` — Personal dashboards and goals
+- `customers.md` — Your customer index
+- `data/` — Your exports and reports
+- `plans/` — Your feature plans
+
+If the user asks you to modify a protected path, remind them:
+> "That file is managed by the upstream template. To propose changes, open an issue or PR on the [upstream repo](https://github.com/idanshimon/customer-hub-oss) instead."
+
+### Receiving Upstream Updates
+
+```bash
+# One-time setup (after cloning)
+git remote add upstream https://github.com/idanshimon/customer-hub-oss.git
+
+# Pull latest template updates (skills, docs, scripts)
+git fetch upstream
+git merge upstream/main
+```
+
+Your customer data in `cust/`, `strategy/`, `wiki/`, etc. will not be affected by upstream merges.
 
 ## Key Rules
 
+- **Competitive Intelligence:** When discussing competitors at any account, check `strategy/competitors/` for cross-customer research first, then the account-specific `competitors.md` for account-level intel.
 - **Source of Truth:** Customer context files in `cust/<customer-name>/context/` are authoritative
 - **Don't Mix Customers:** Never blend data between customer folders
 - **Python Scripts:** Always activate `.venv` before running Python scripts
